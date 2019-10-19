@@ -113,6 +113,24 @@ if (temErro==1){
 }
 
 }
+function validadata(){
+ var datanasc = document.getElementById("bday").value; // pega o valor do input 
+ datanasc = datanasc.replace(/\//g, "-"); // substitui eventuais barras (ex. IE) "/" por hífen "-"
+ var data_array = datanasc.split("-"); // quebra a data em array // para o IE onde será inserido no formato dd/MM/yyyy
+  if(data_array[0].length != 4){ data = data_array[2]+"-"+data_array[1]+"-"+data_array[0]; } // remonto a data no formato yyyy/MM/dd 
+  // comparo as datas e calculo a idade 
+  var today = new Date();
+  var nasc = new Date(datanasc);
+  var age = today.getFullYear() - nasc.getFullYear(); 
+  var m = today.getMonth() - nasc.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < nasc.getDate())) age--; if(age < 18){ 
+    return false;
+     }
+   if(age >= 18){
+    return true;
+     }
+
+  }
 	function validateForm() {
 	// colocar aqui todas as validações
 	// devolve false se falhar alguma regra, true caso contrário
@@ -122,11 +140,9 @@ if (temErro==1){
 		var nome =document.getElementById("name").value;
 		var cc =document.getElementById("cc").value;
 		var nif =document.getElementById("nif").value;
-		var bdayx =  inputdata.getDate()+'/'+(inputdata.getMonth()+1)+'/'+ inputdata.getFullYear();
-		var today= new Date();
-        var mindate = today.getDate()+'/'+(today.getMonth()+1)+'/'+(today.getFullYear()-18);
+		
 
-		if (bdayx > mindate) {
+		if (validadata() == false ) {
 			document.getElementById("formFeedback").style.color = "red";
 			document.getElementById("formFeedback").innerHTML = "Erro: data de nascimento inválido!";
 			//Vamos ajudar o utilizador indicando qual o campo errado
