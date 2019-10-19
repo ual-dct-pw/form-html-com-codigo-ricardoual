@@ -65,30 +65,98 @@ div {
 }
 </style>
 <script>
+	function validaContribuinte(contribuinte){
+var temErro=0;
+
+if (
+contribuinte.substr(0,1) != '1' && // pessoa singular
+contribuinte.substr(0,1) != '2' && // pessoa singular
+contribuinte.substr(0,1) != '3' && // pessoa singular
+contribuinte.substr(0,2) != '45' && // pessoa singular não residente
+contribuinte.substr(0,1) != '5' && // pessoa colectiva
+contribuinte.substr(0,1) != '6' && // administração pública
+contribuinte.substr(0,2) != '70' && // herança indivisa
+contribuinte.substr(0,2) != '71' && // pessoa colectiva não residente
+contribuinte.substr(0,2) != '72' && // fundos de investimento
+contribuinte.substr(0,2) != '77' && // atribuição oficiosa
+contribuinte.substr(0,2) != '79' && // regime excepcional
+contribuinte.substr(0,1) != '8' && // empresário em nome individual (extinto)
+contribuinte.substr(0,2) != '90' && // condominios e sociedades irregulares
+contribuinte.substr(0,2) != '91' && // condominios e sociedades irregulares
+contribuinte.substr(0,2) != '98' && // não residentes
+contribuinte.substr(0,2) != '99' // sociedades civis
+
+) { temErro=1;}
+var check1 = contribuinte.substr(0,1)*9;
+var check2 = contribuinte.substr(1,1)*8;
+var check3 = contribuinte.substr(2,1)*7;
+var check4 = contribuinte.substr(3,1)*6;
+var check5 = contribuinte.substr(4,1)*5;
+var check6 = contribuinte.substr(5,1)*4;
+var check7 = contribuinte.substr(6,1)*3;
+var check8 = contribuinte.substr(7,1)*2;
+
+var total= check1 + check2 + check3 + check4 + check5 + check6 + check7 + check8;
+var divisao= total / 11;
+var modulo11=total - parseInt(divisao)*11;
+if ( modulo11==1 || modulo11==0){ comparador=0; } // excepção
+else { comparador= 11-modulo11;}
+
+
+var ultimoDigito=contribuinte.substr(8,1)*1;
+if ( ultimoDigito != comparador ){ 
+	return true;
+				 }
+
+if (temErro==1){ 
+	return false;
+}
+
+}
 	function validateForm() {
 	// colocar aqui todas as validações
 	// devolve false se falhar alguma regra, true caso contrário
 	// utilizar a variável formFeedback para indicar os erros
 		console.log("sadfsad");
-		var cc=document.getElementById("cc").value;
-		if (isNaN(cc) || cc.length < 8 || cc.length > 8) {
+        var inputdata = new Date(document.getElementById("bday").value);
+		var nome =document.getElementById("name").value;
+		var cc =document.getElementById("cc").value;
+		var nif =document.getElementById("nif").value;
+		var bdayx =  inputdata.getDate()+'/'+(inputdata.getMonth()+1)+'/'+ inputdata.getFullYear();
+		var today= new Date();
+        var mindate = today.getDate()+'/'+(today.getMonth()+1)+'/'+(today.getFullYear()-18);
+
+		if (bdayx > mindate) {
+			document.getElementById("formFeedback").style.color = "red";
+			document.getElementById("formFeedback").innerHTML = "Erro: data de nascimento inválido!";
+			//Vamos ajudar o utilizador indicando qual o campo errado
+			document.getElementById("bday").focus();
+			return false;
+		}
+		else if (isNaN(nif) ||validaContribuinte(nif) == true  ) {
+			document.getElementById("formFeedback").style.color = "red";
+			document.getElementById("formFeedback").innerHTML = "Erro: nif inválido!";
+			//Vamos ajudar o utilizador indicando qual o campo errado
+			document.getElementById("nif").focus();
+			return false;
+		}
+		else if (isNaN(cc) || cc.length < 8 || cc.length > 8) {
 			document.getElementById("formFeedback").style.color = "red";
 			document.getElementById("formFeedback").innerHTML = "Erro: número de CC inválido!";
 			//Vamos ajudar o utilizador indicando qual o campo errado
 			document.getElementById("cc").focus();
-			
 			return false;
 		}
+		
 		else {
 			
 			// colocar aqui o alert com todos os dados inseridos e validados
 			document.getElementById("formFeedback").style.color = "green";
 			document.getElementById("formFeedback").innerHTML = "Ok!";
+			return true;
 		}
-		return false;
-		//return true;
 		
-		
+	
 		
 	}
 	
@@ -98,7 +166,7 @@ div {
 		var ipClient ="";
 		xhttp.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200) {
-             //alert(this.responseText);
+                          //alert(this.responseText);
 			 //var myArr = JSON.parse(this.responseText);
 			 //document.getElementById("securityinfo").innerHTML = "Segurança: " + this.responseText;
 			 ipClient=this.responseText;
@@ -119,7 +187,26 @@ div {
 		var urlToCall ="https://ipapi.co/" + ipClient + "/json/";
 		xhttp2.open("GET", urlToCall, true);
 		xhttp2.send();
+		var xhttp3 = new XMLHttpRequest();
+		xhttp3.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				document.getElementById("longitude").value = this.responseText;
 	}
+	};
+	var calllong ="https://ipapi.co/" + ipClient + "/longitude/";
+	xhttp3.open("GET", calllong, true);
+    xhttp3.send();
+    var xhttp4 = new XMLHttpRequest();
+		xhttp4.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				document.getElementById("latitude").value = this.responseText;
+	}
+	};
+	var calllati ="https://ipapi.co/" + ipClient + "/latitude/";
+	xhttp4.open("GET", calllati, true);
+    xhttp4.send();
+	}
+	
 
 	function callThinkingAPI() {
 		//document.getElementById("pensamento").innerHTML = "Thinking!";
@@ -135,6 +222,20 @@ div {
 		xhttp.open("GET", "https://www.boredapi.com/api/activity?type=recreational", true);
 		xhttp.send();
 	}
+	function clean() {
+		 document.getElementById("name").innerHTML = null;
+		 document.getElementById("bday").innerHTML = null;
+		 document.getElementById("nif").innerHTML = null;
+		 document.getElementById("cc").innerHTML = null;
+		 document.getElementById("adress").innerHTML = null;
+		 document.getElementById("cp").innerHTML = null;
+		 document.getElementById("city").innerHTML = null;
+		 document.getElementById("latitude").innerHTML = null;
+		 document.getElementById("longitude").innerHTML = null;
+		 document.getElementById("email").innerHTML = null;
+		 document.getElementById("mobile").innerHTML = null;
+
+}
 	
 </script>
 <body onload="callSecurityAPI()">
@@ -144,13 +245,13 @@ div {
 <div>
   <form action="/action_page.php" onsubmit="return validateForm()" method="post">
     <label for="name">Nome</label>
-    <input type="text" id="name" name="username" placeholder="Seu nome..." required oninvalid="this.setCustomValidity('Preencha o campo...')" ><br>
+    <input type="text" id="name" name="username" placeholder="Seu nome..." required oninvalid="this.setCustomValidity('Preencha o campo...')" oninput="setCustomValidity('')"><br>
 
     <label for="bday">Data de Nascimento</label>
-    <input type="date" id="bday" name="userbday" required oninvalid="this.setCustomValidity('Preencha o campo...')" /><br><br>
+    <input type="date" id="bday" name="userbday" required oninvalid="this.setCustomValidity('Preencha o campo...')" oninput="setCustomValidity('')"/><br><br>
 
     <label for="nif">NIF</label>
-    <input type="text" id="nif" name="usernif" placeholder="Seu NIF..." required oninvalid="this.setCustomValidity('Preencha o campo...')" ><br>
+    <input type="text" id="nif" name="usernif" placeholder="Seu NIF..." required oninvalid="this.setCustomValidity('Preencha o campo...')" oninput="setCustomValidity('')"><br>
 	
 	<label for="cc">CC</label>
     <input type="text" id="cc" name="usercc" placeholder="Seu CC..."><br>
@@ -171,12 +272,12 @@ div {
     <input type="text" id="longitude" name="userlongitude"><br>
 	
 	<label for="email">Email</label>
-    <input type="email" id="email" name="useremail" placeholder="Seu email..." required  oninvalid="this.setCustomValidity('Preencha o campo...')" ><br>
+    <input type="email" id="email" name="useremail" placeholder="Seu email..." required  oninvalid="this.setCustomValidity('Preencha o campo...')" oninput="setCustomValidity('')"><br>
 	
 	<label for="mobile">Telemóvel</label>
     <input type="text" id="mobile" name="usermobile" placeholder="Seu telemóvel..."><br>
   
-    <input type="submit" value="Submit"><input type="reset" value="Clear"><input type="button" value="Pensamento do dia" onclick="callThinkingAPI()"> 
+    <input type="submit" value="Submit"><input type="reset" value="Clear" onclick="clean()"><input type="button" value="Pensamento do dia" onclick="callThinkingAPI()"> 
 	<p id="formFeedback"></p>
 	<label id="pensamento"></label>
   </form>
